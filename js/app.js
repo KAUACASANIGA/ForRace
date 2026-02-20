@@ -152,14 +152,11 @@
 })();
 
 (() => {
-  const React = window.React;
-  const ReactDOM = window.ReactDOM;
   const fleetRoot = document.getElementById("fleet-focus-root");
   const fleetCards = Array.from(document.querySelectorAll(".fleet .car"));
 
-  if (!React || !ReactDOM || !fleetRoot || fleetCards.length === 0) return;
+  if (!fleetRoot || fleetCards.length === 0) return;
 
-  const { useEffect, useRef, useState } = React;
   const parseList = (value, separator) =>
     (value || "")
       .split(separator)
@@ -188,233 +185,411 @@
     };
   };
 
-  function FleetFocusOverlay() {
-    const [activeCard, setActiveCard] = useState(null);
-    const [activeImageIndex, setActiveImageIndex] = useState(0);
-    const [isOverlayImageFading, setIsOverlayImageFading] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
-    const enterDelayMs = 35;
-    const unmountDelayMs = 360;
-    const showTimerRef = useRef(null);
-    const unmountTimerRef = useRef(null);
-    const activeCardRef = useRef(null);
-    const activeImageIndexRef = useRef(0);
+  const enterDelayMs = 35;
+  const hideDelayMs = 360;
+  let activeCard = null;
+  let activeImageIndex = 0;
+  let isMounted = false;
+  let showTimer = null;
+  let hideTimer = null;
 
-    const clearTimers = () => {
-      if (showTimerRef.current) {
-        window.clearTimeout(showTimerRef.current);
-        showTimerRef.current = null;
-      }
-      if (unmountTimerRef.current) {
-        window.clearTimeout(unmountTimerRef.current);
-        unmountTimerRef.current = null;
-      }
-    };
+  const clearTimers = () => {
+    if (showTimer) {
+      window.clearTimeout(showTimer);
+      showTimer = null;
+    }
+    if (hideTimer) {
+      window.clearTimeout(hideTimer);
+      hideTimer = null;
+    }
+  };
 
-    const syncCardSelection = (cardData, selectedIndex) => {
-      if (!cardData) return;
-      const gallerySize = cardData.gallery?.length || 0;
-      if (gallerySize === 0) return;
-      const safeIndex = ((selectedIndex % gallerySize) + gallerySize) % gallerySize;
+  const syncCardSelection = (cardData, selectedIndex) => {
+    if (!cardData) return;
+    const gallerySize = cardData.gallery?.length || 0;
+    if (gallerySize === 0) return;
+    const safeIndex = ((selectedIndex % gallerySize) + gallerySize) % gallerySize;
 
-      if (cardData.cardId && fleetGalleryControllers.has(cardData.cardId)) {
-        const controller = fleetGalleryControllers.get(cardData.cardId);
-        controller.setSlide(safeIndex);
-        return;
-      }
+    if (cardData.cardId && fleetGalleryControllers.has(cardData.cardId)) {
+      const controller = fleetGalleryControllers.get(cardData.cardId);
+      controller.setSlide(safeIndex);
+      return;
+    }
 
-      const card = cardData.cardId
-        ? document.querySelector(`.fleet .car[data-card-id="${cardData.cardId}"]`)
-        : null;
-      const photo = card?.querySelector(".car-photo");
-      const img = photo?.querySelector("img");
-      if (!photo || !img) return;
+    const card = cardData.cardId
+      ? document.querySelector(`.fleet .car[data-card-id="${cardData.cardId}"]`)
+      : null;
+    const photo = card?.querySelector(".car-photo");
+    const img = photo?.querySelector("img");
+    if (!photo || !img) return;
 
-      img.src = cardData.gallery[safeIndex];
-      img.alt =
-        (cardData.galleryAlts && cardData.galleryAlts[safeIndex]) ||
-        cardData.imageAlt ||
-        "Carro da frota";
-      photo.dataset.activeIndex = String(safeIndex);
-    };
+    img.src = cardData.gallery[safeIndex];
+    img.alt = (cardData.galleryAlts && cardData.galleryAlts[safeIndex]) || cardData.imageAlt || "Carro da frota";
+    photo.dataset.activeIndex = String(safeIndex);
+  };
 
-    const show = (card) => {
-      clearTimers();
-      const data = extractCardData(card);
-      const maxIndex = Math.max((data.gallery?.length || 1) - 1, 0);
-      const startIndex = Math.min(Math.max(data.activeIndex, 0), maxIndex);
-      setActiveCard(data);
-      setActiveImageIndex(startIndex);
-      setIsOverlayImageFading(false);
-      showTimerRef.current = window.setTimeout(() => setIsVisible(true), enterDelayMs);
-    };
+  const overlay = document.createElement("div");
+  overlay.className = "fleet-focus-overlay";
+  overlay.setAttribute("aria-hidden", "true");
 
-    const hide = () => {
-      clearTimers();
-      const currentCard = activeCardRef.current;
-      const selectedIndex = activeImageIndexRef.current;
-      syncCardSelection(currentCard, selectedIndex);
-      setIsOverlayImageFading(false);
-      setIsVisible(false);
-      unmountTimerRef.current = window.setTimeout(() => setActiveCard(null), unmountDelayMs);
-    };
+  const cardEl = document.createElement("article");
+  cardEl.className = "fleet-focus-card";
 
-    const changeOverlaySlide = (resolver) => {
-      const current = activeCardRef.current;
-      const gallerySize = current?.gallery?.length || 0;
-      if (gallerySize <= 1) return;
-      setIsOverlayImageFading(true);
-      window.setTimeout(() => {
-        setActiveImageIndex((index) => {
-          const nextIndex = resolver(index, gallerySize);
-          return (nextIndex + gallerySize) % gallerySize;
-        });
-        window.requestAnimationFrame(() => {
-          window.setTimeout(() => setIsOverlayImageFading(false), 16);
-        });
-      }, 120);
-    };
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "fleet-focus-close";
+  closeButton.setAttribute("aria-label", "Fechar destaque");
+  closeButton.textContent = "×";
 
-    useEffect(() => {
-      const handlers = fleetCards.map((card) => {
-        const onClick = () => show(card);
-        card.addEventListener("click", onClick);
-        return { card, onClick };
+  const media = document.createElement("img");
+  media.className = "fleet-focus-media";
+  media.alt = "Carro da frota";
+
+  const prevButton = document.createElement("button");
+  prevButton.type = "button";
+  prevButton.className = "fleet-focus-control prev";
+  prevButton.setAttribute("aria-label", "Foto anterior");
+  prevButton.textContent = "<";
+
+  const nextButton = document.createElement("button");
+  nextButton.type = "button";
+  nextButton.className = "fleet-focus-control next";
+  nextButton.setAttribute("aria-label", "Proxima foto");
+  nextButton.textContent = ">";
+
+  const dots = document.createElement("div");
+  dots.className = "fleet-focus-dots";
+
+  const content = document.createElement("div");
+  content.className = "fleet-focus-content";
+  const tag = document.createElement("div");
+  tag.className = "tag";
+  const title = document.createElement("h3");
+  title.className = "fleet-focus-title";
+  const copy = document.createElement("p");
+  copy.className = "fleet-focus-copy";
+
+  content.append(tag, title, copy);
+  cardEl.append(closeButton, media, prevButton, nextButton, dots, content);
+  overlay.appendChild(cardEl);
+  fleetRoot.appendChild(overlay);
+
+  const updateDots = () => {
+    dots.innerHTML = "";
+    const gallerySize = activeCard?.gallery?.length || 0;
+    if (gallerySize <= 1) return;
+
+    for (let i = 0; i < gallerySize; i += 1) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = `fleet-focus-dot ${i === activeImageIndex ? "is-active" : ""}`;
+      dot.setAttribute("aria-label", `Ir para foto ${i + 1}`);
+      dot.addEventListener("click", (event) => {
+        event.stopPropagation();
+        changeOverlaySlide(() => i);
       });
+      dots.appendChild(dot);
+    }
+  };
 
-      const onKeyDown = (event) => {
-        const current = activeCardRef.current;
-        if (!current) return;
-        if (event.key === "Escape") {
-          hide();
-        }
-        if (event.key === "ArrowRight" && current.gallery.length > 1) {
-          changeOverlaySlide((index, size) => (index + 1) % size);
-        }
-        if (event.key === "ArrowLeft" && current.gallery.length > 1) {
-          changeOverlaySlide((index, size) => (index - 1 + size) % size);
-        }
-      };
-      document.addEventListener("keydown", onKeyDown);
-
-      return () => {
-        clearTimers();
-        document.removeEventListener("keydown", onKeyDown);
-        handlers.forEach(({ card, onClick }) => {
-          card.removeEventListener("click", onClick);
-        });
-      };
-    }, []);
-
-    useEffect(() => {
-      activeCardRef.current = activeCard;
-    }, [activeCard]);
-
-    useEffect(() => {
-      activeImageIndexRef.current = activeImageIndex;
-    }, [activeImageIndex]);
-
-    if (!activeCard) return null;
-
+  const renderOverlay = () => {
+    if (!activeCard) return;
     const gallerySize = activeCard.gallery?.length || 0;
     const currentImageSrc = gallerySize > 0 ? activeCard.gallery[activeImageIndex] : activeCard.imageSrc;
     const currentImageAlt =
-      (activeCard.galleryAlts && activeCard.galleryAlts[activeImageIndex]) ||
-      activeCard.imageAlt ||
-      "Carro da frota";
+      (activeCard.galleryAlts && activeCard.galleryAlts[activeImageIndex]) || activeCard.imageAlt || "Carro da frota";
 
-    return React.createElement(
-      "div",
-      {
-        className: `fleet-focus-overlay ${isVisible ? "is-visible" : ""}`,
-        "aria-hidden": "true",
-        onClick: hide,
-      },
-      React.createElement(
-        "article",
-        {
-          className: "fleet-focus-card",
-          onClick: (event) => event.stopPropagation(),
-        },
-        React.createElement(
-          "button",
-          {
-            type: "button",
-            className: "fleet-focus-close",
-            "aria-label": "Fechar destaque",
-            onClick: hide,
-          },
-          "\u00d7"
-        ),
-        currentImageSrc
-          ? React.createElement("img", {
-              className: `fleet-focus-media ${isOverlayImageFading ? "is-fading" : ""}`,
-              src: currentImageSrc,
-              alt: currentImageAlt,
-            })
-          : null,
-        gallerySize > 1
-          ? React.createElement(
-              React.Fragment,
-              null,
-              React.createElement(
-                "button",
-                {
-                  type: "button",
-                  className: "fleet-focus-control prev",
-                  "aria-label": "Foto anterior",
-                  onClick: (event) => {
-                    event.stopPropagation();
-                    changeOverlaySlide((index, size) => (index - 1 + size) % size);
-                  },
-                },
-                "<"
-              ),
-              React.createElement(
-                "button",
-                {
-                  type: "button",
-                  className: "fleet-focus-control next",
-                  "aria-label": "Proxima foto",
-                  onClick: (event) => {
-                    event.stopPropagation();
-                    changeOverlaySlide((index, size) => (index + 1) % size);
-                  },
-                },
-                ">"
-              ),
-              React.createElement(
-                "div",
-                { className: "fleet-focus-dots" },
-                activeCard.gallery.map((_, dotIndex) =>
-                  React.createElement("button", {
-                    key: `dot-${dotIndex}`,
-                    type: "button",
-                    className: `fleet-focus-dot ${dotIndex === activeImageIndex ? "is-active" : ""}`,
-                    "aria-label": `Ir para foto ${dotIndex + 1}`,
-                    onClick: (event) => {
-                      event.stopPropagation();
-                      changeOverlaySlide(() => dotIndex);
-                    },
-                  })
-                )
-              )
-            )
-          : null,
-        React.createElement(
-          "div",
-          { className: "fleet-focus-content" },
-          activeCard.tag ? React.createElement("div", { className: "tag" }, activeCard.tag) : null,
-          React.createElement("h3", { className: "fleet-focus-title" }, activeCard.title),
-          React.createElement("p", { className: "fleet-focus-copy" }, activeCard.copy)
-        )
-      )
-    );
-  }
+    media.src = currentImageSrc || "";
+    media.alt = currentImageAlt;
+    media.style.display = currentImageSrc ? "block" : "none";
+    tag.textContent = activeCard.tag || "";
+    tag.style.display = activeCard.tag ? "inline-block" : "none";
+    title.textContent = activeCard.title;
+    copy.textContent = activeCard.copy;
 
-  if (typeof ReactDOM.createRoot === "function") {
-    ReactDOM.createRoot(fleetRoot).render(React.createElement(FleetFocusOverlay));
-  } else {
-    ReactDOM.render(React.createElement(FleetFocusOverlay), fleetRoot);
-  }
+    const hasGallery = gallerySize > 1;
+    prevButton.style.display = hasGallery ? "grid" : "none";
+    nextButton.style.display = hasGallery ? "grid" : "none";
+    dots.style.display = hasGallery ? "flex" : "none";
+    updateDots();
+  };
+
+  const openOverlay = (card) => {
+    clearTimers();
+    const data = extractCardData(card);
+    const maxIndex = Math.max((data.gallery?.length || 1) - 1, 0);
+    activeCard = data;
+    activeImageIndex = Math.min(Math.max(data.activeIndex, 0), maxIndex);
+    renderOverlay();
+
+    isMounted = true;
+    overlay.style.display = "grid";
+    showTimer = window.setTimeout(() => {
+      overlay.classList.add("is-visible");
+    }, enterDelayMs);
+  };
+
+  const closeOverlay = () => {
+    if (!isMounted) return;
+    clearTimers();
+    syncCardSelection(activeCard, activeImageIndex);
+    overlay.classList.remove("is-visible");
+    hideTimer = window.setTimeout(() => {
+      overlay.style.display = "none";
+      activeCard = null;
+      isMounted = false;
+    }, hideDelayMs);
+  };
+
+  const changeOverlaySlide = (resolver) => {
+    const gallerySize = activeCard?.gallery?.length || 0;
+    if (gallerySize <= 1) return;
+
+    media.classList.add("is-fading");
+    window.setTimeout(() => {
+      const next = resolver(activeImageIndex, gallerySize);
+      activeImageIndex = (next + gallerySize) % gallerySize;
+      renderOverlay();
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => media.classList.remove("is-fading"), 16);
+      });
+    }, 120);
+  };
+
+  overlay.addEventListener("click", closeOverlay);
+  cardEl.addEventListener("click", (event) => event.stopPropagation());
+  closeButton.addEventListener("click", closeOverlay);
+  prevButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    changeOverlaySlide((index, size) => (index - 1 + size) % size);
+  });
+  nextButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    changeOverlaySlide((index, size) => (index + 1) % size);
+  });
+
+  fleetCards.forEach((card) => {
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("a, button")) return;
+      openOverlay(card);
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!isMounted || !activeCard) return;
+    if (event.key === "Escape") closeOverlay();
+    if (event.key === "ArrowRight") changeOverlaySlide((index, size) => (index + 1) % size);
+    if (event.key === "ArrowLeft") changeOverlaySlide((index, size) => (index - 1 + size) % size);
+  });
+
+  overlay.style.display = "none";
+})();
+
+(() => {
+  const projectRoot = document.getElementById("project-focus-root");
+  const projectCards = Array.from(document.querySelectorAll(".project-card[data-gallery]"));
+  if (!projectRoot || projectCards.length === 0) return;
+
+  const parseList = (value, separator) =>
+    (value || "")
+      .split(separator)
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+  const overlay = document.createElement("div");
+  overlay.className = "project-focus-overlay";
+  overlay.setAttribute("aria-hidden", "true");
+
+  const card = document.createElement("article");
+  card.className = "project-focus-card";
+  card.style.position = "relative";
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.className = "project-focus-close";
+  closeButton.setAttribute("aria-label", "Fechar projeto");
+  closeButton.textContent = "×";
+
+  const mediaWrap = document.createElement("div");
+  mediaWrap.className = "project-focus-media-wrap";
+  const media = document.createElement("img");
+  media.className = "project-focus-media";
+  media.alt = "Foto do projeto";
+
+  const prevButton = document.createElement("button");
+  prevButton.type = "button";
+  prevButton.className = "project-focus-control prev";
+  prevButton.setAttribute("aria-label", "Foto anterior");
+  prevButton.textContent = "<";
+
+  const nextButton = document.createElement("button");
+  nextButton.type = "button";
+  nextButton.className = "project-focus-control next";
+  nextButton.setAttribute("aria-label", "Proxima foto");
+  nextButton.textContent = ">";
+
+  const dots = document.createElement("div");
+  dots.className = "project-focus-dots";
+  mediaWrap.append(media, prevButton, nextButton, dots);
+
+  const content = document.createElement("div");
+  content.className = "project-focus-content";
+  const tag = document.createElement("div");
+  tag.className = "tag";
+  const title = document.createElement("h3");
+  const shortCopy = document.createElement("p");
+  shortCopy.className = "project-focus-copy";
+  const detailCopy = document.createElement("p");
+  detailCopy.className = "project-focus-copy";
+
+  const rentWidget = document.createElement("div");
+  rentWidget.className = "project-rent-widget";
+  const rentTitle = document.createElement("h4");
+  rentTitle.textContent = "Aluga-se";
+  const rentText = document.createElement("p");
+  const rentCta = document.createElement("a");
+  rentCta.className = "cta";
+  rentCta.href = "https://wa.me/5511945339281";
+  rentCta.target = "_blank";
+  rentCta.rel = "noopener";
+  rentCta.textContent = "Consultar disponibilidade";
+  rentWidget.append(rentTitle, rentText, rentCta);
+
+  content.append(tag, title, shortCopy, detailCopy, rentWidget);
+  card.append(closeButton, mediaWrap, content);
+  overlay.appendChild(card);
+  projectRoot.appendChild(overlay);
+
+  let activeData = null;
+  let activeIndex = 0;
+
+  const renderDots = () => {
+    dots.innerHTML = "";
+    const size = activeData?.gallery?.length || 0;
+    if (size <= 1) return;
+    for (let i = 0; i < size; i += 1) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = `project-focus-dot ${i === activeIndex ? "is-active" : ""}`;
+      dot.setAttribute("aria-label", `Ir para foto ${i + 1}`);
+      dot.addEventListener("click", (event) => {
+        event.stopPropagation();
+        changeSlide(() => i);
+      });
+      dots.appendChild(dot);
+    }
+  };
+
+  const render = () => {
+    if (!activeData) return;
+    const size = activeData.gallery.length;
+    const src = activeData.gallery[activeIndex] || "";
+    const alt = activeData.alts[activeIndex] || activeData.alts[0] || "Foto do projeto";
+
+    media.src = src;
+    media.alt = alt;
+    tag.textContent = activeData.tag;
+    title.textContent = activeData.title;
+    shortCopy.textContent = activeData.shortCopy;
+    detailCopy.textContent = activeData.detail;
+    rentText.textContent = activeData.rentLabel;
+
+    const hasGallery = size > 1;
+    prevButton.style.display = hasGallery ? "grid" : "none";
+    nextButton.style.display = hasGallery ? "grid" : "none";
+    dots.style.display = hasGallery ? "flex" : "none";
+    renderDots();
+  };
+
+  const open = (data) => {
+    activeData = data;
+    activeIndex = 0;
+    render();
+    overlay.style.display = "grid";
+    window.setTimeout(() => overlay.classList.add("is-visible"), 20);
+  };
+
+  const close = () => {
+    overlay.classList.remove("is-visible");
+    window.setTimeout(() => {
+      overlay.style.display = "none";
+      activeData = null;
+    }, 280);
+  };
+
+  const changeSlide = (resolver) => {
+    const size = activeData?.gallery?.length || 0;
+    if (size <= 1) return;
+    media.classList.add("is-fading");
+    window.setTimeout(() => {
+      const nextIndex = resolver(activeIndex, size);
+      activeIndex = (nextIndex + size) % size;
+      render();
+      window.requestAnimationFrame(() => {
+        window.setTimeout(() => media.classList.remove("is-fading"), 16);
+      });
+    }, 110);
+  };
+
+  projectCards.forEach((el) => {
+    const gallery = parseList(el.dataset.gallery, ",");
+    if (gallery.length === 0) return;
+    const alts = parseList(el.dataset.galleryAlts, "|");
+    const data = {
+      gallery,
+      alts,
+      tag: el.querySelector(".tag")?.textContent?.trim() || "Projeto",
+      title: el.querySelector("h3")?.textContent?.trim() || "Projeto ForRace",
+      shortCopy: el.querySelector("p")?.textContent?.trim() || "",
+      detail: el.dataset.detail || "",
+      rentLabel: el.dataset.rentLabel || "Disponivel sob consulta.",
+    };
+    el.addEventListener("click", () => open(data));
+  });
+
+  closeButton.addEventListener("click", close);
+  overlay.addEventListener("click", close);
+  card.addEventListener("click", (event) => event.stopPropagation());
+  prevButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    changeSlide((index, size) => (index - 1 + size) % size);
+  });
+  nextButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    changeSlide((index, size) => (index + 1) % size);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!activeData) return;
+    if (event.key === "Escape") close();
+    if (event.key === "ArrowRight") changeSlide((index, size) => (index + 1) % size);
+    if (event.key === "ArrowLeft") changeSlide((index, size) => (index - 1 + size) % size);
+  });
+
+  overlay.style.display = "none";
+})();
+
+(() => {
+  const widgets = Array.from(document.querySelectorAll(".service-widget[data-whatsapp]"));
+  if (widgets.length === 0) return;
+
+  widgets.forEach((widget) => {
+    const url = widget.dataset.whatsapp;
+    if (!url) return;
+
+    widget.addEventListener("click", (event) => {
+      if (event.target.closest("a, button")) return;
+      window.open(url, "_blank", "noopener");
+    });
+
+    widget.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      window.open(url, "_blank", "noopener");
+    });
+
+    widget.setAttribute("tabindex", "0");
+    widget.setAttribute("role", "link");
+    widget.setAttribute("aria-label", "Abrir atendimento de locacao no WhatsApp");
+  });
 })();

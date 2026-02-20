@@ -67,9 +67,15 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 18px;
+  justify-items: center;
+}
+
+#servicos.section-title {
+  text-align: center;
 }
 
 .service-widgets > .service-widget:only-child {
+  width: 100%;
   max-width: 680px;
 }
 
@@ -115,6 +121,26 @@
 
 .service-cta {
   width: fit-content;
+}
+
+.projects-hero .hero-card .cta-group {
+  margin-top: 16px;
+}
+
+.hero-contact-group .social-link {
+  min-height: 54px;
+  padding: 0 22px;
+  font-size: 13px;
+  border-width: 1px;
+  border-color: rgba(247, 197, 72, 0.55);
+  background: rgba(240, 74, 58, 0.2);
+  box-shadow: 0 16px 30px -20px rgba(240, 74, 58, 0.65);
+}
+
+.hero-contact-group .social-link:hover {
+  transform: translateY(-3px);
+  border-color: rgba(247, 197, 72, 0.85);
+  box-shadow: 0 26px 36px -22px rgba(240, 74, 58, 0.75);
 }
 
 .project-focus-overlay {

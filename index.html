@@ -10,13 +10,15 @@
 <div id="home-top"></div>
 <div class="wrap">
   <header>
-    <div class="logo">
-      <div class="logo-mark">FR</div>
-      <div>
-        <div class="logo-title">ForRace</div>
-        <div class="logo-subtitle">Equipe de corrida</div>
+    <a class="logo-link" href="#home-top" aria-label="Voltar para o inicio da apresentacao">
+      <div class="logo">
+        <div class="logo-mark">FR</div>
+        <div>
+          <div class="logo-title">ForRace</div>
+          <div class="logo-subtitle">Equipe de corrida</div>
+        </div>
       </div>
-    </div>
+    </a>
     <nav>
       <a class="home-link" href="index.html" aria-label="Pagina inicial">
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -25,6 +27,7 @@
       </a>
       <a href="#cars">Frota</a>
       <a href="pilotos.html">Pilotos</a>
+      <a href="projetos.html">Projetos</a>
       <a href="#historia">Nossa Historia</a>
       <a href="#base">Base</a>
       <a href="#agenda">Agenda</a>
@@ -34,6 +37,7 @@
     <div class="mobile-quick-nav" aria-label="Navegacao rapida">
       <a href="#cars">Frota</a>
       <a href="pilotos.html">Pilotos</a>
+      <a href="projetos.html">Projetos</a>
       <a href="#agenda">Agenda</a>
       <a href="#contato">Contato</a>
     </div>
@@ -69,16 +73,28 @@
     <a class="cta pilots-entry-cta" href="pilotos.html">Ir para Pilotos</a>
   </section>
 
+  <section class="pilots-entry" aria-label="Acesso para pagina de projetos">
+    <div>
+      <h2>Projetos em destaque</h2>
+      <p>Veja os projetos completos da equipe e possibilidades de aluguel e montagem.</p>
+    </div>
+    <a class="cta pilots-entry-cta" href="projetos.html">Ir para Projetos</a>
+  </section>
+
   <h2 class="section-title" id="cars">Frota da forrace</h2>
   <section class="fleet">
     <article class="car">
       <div class="car-photo" data-gallery="img/fusca-copa.png, img/fusca-copa-extra.png" data-gallery-alts="Fusca Copa fusca em pista|Fusca Copa fusca em pista - foto 2">
-        <img src="img/fusca-copa.png" alt="Fusca Copa fusca em pista" />
+        <img src="img/fusca-copa.png" alt="Fusca Copa fusca em pista" loading="lazy" decoding="async" />
         <div class="overlay">Fusca</div>
       </div>
       <div class="tag">Classico</div>
       <h3>Fusca Copa fusca</h3>
       <p>Chassi leve, motor aspirado e equilibrio para provas curtas. O classico que abre espaco no grid.</p>
+      <div class="car-actions">
+        <a class="car-action" href="projetos.html#destaques">Saiba mais</a>
+        <a class="car-action is-primary" href="https://wa.me/5511945339281" target="_blank" rel="noopener">Consulte disponibilidade</a>
+      </div>
       <div class="car-stats">
         <div>Potencia<span>135 cv</span></div>
         <div>Peso<span>800 kg</span></div>
@@ -88,12 +104,16 @@
     </article>
     <article class="car">
       <div class="car-photo" data-gallery="img/escort-rs.png, img/escort-rs-extra.png" data-gallery-alts="Escort RS em pista|Escort RS em pista - foto 2">
-        <img src="img/escort-rs.png" alt="Escort RS em pista" />
+        <img src="img/escort-rs.png" alt="Escort RS em pista" loading="lazy" decoding="async" />
         <div class="overlay">Escort</div>
       </div>
       <div class="tag">Rally classicos </div>
       <h3>Escort RS</h3>
       <p>Torque agressivo, tracao firme e estilo setentista. O carro que comunica com vocÃª.</p>
+      <div class="car-actions">
+        <a class="car-action" href="projetos.html#destaques">Saiba mais</a>
+        <a class="car-action is-primary" href="https://wa.me/5511945339281" target="_blank" rel="noopener">Consulte disponibilidade</a>
+      </div>
       <div class="car-stats">
         <div>Potencia<span>150 cv</span></div>
         <div>Peso<span>820 kg</span></div>
@@ -106,6 +126,10 @@
       <div class="tag">Rally classicos</div>
       <h3>Gol Rally</h3>
       <p>Leveza, freio forte e pegada de pista antiga. O parceiro do Escort nas provas classicas.</p>
+      <div class="car-actions">
+        <a class="car-action" href="projetos.html#destaques">Saiba mais</a>
+        <a class="car-action is-primary" href="https://wa.me/5511945339281" target="_blank" rel="noopener">Consulte disponibilidade</a>
+      </div>
       <div class="car-stats">
         <div>Potencia<span>130 cv</span></div>
         <div>Peso<span>780 kg</span></div>
@@ -115,12 +139,16 @@
     </article>
     <article class="car">
       <div class="car-photo" data-gallery="img/spyder-s1.png, img/spyder-s1-extra.png" data-gallery-alts="Spyder S1 em pista|Spyder S1 em pista - foto 2">
-        <img src="img/spyder-s1.png" alt="Spyder S1 em pista" />
+        <img src="img/spyder-s1.png" alt="Spyder S1 em pista" loading="lazy" decoding="async" />
         <div class="overlay">Spyder</div>
       </div>
       <div class="tag">Prototype</div>
       <h3>Spyder S1</h3>
       <p>Aerodinamica cortante, cockpit minimal e velocidade maxima. A arma secreta da forrace.</p>
+      <div class="car-actions">
+        <a class="car-action" href="projetos.html#destaques">Saiba mais</a>
+        <a class="car-action is-primary" href="https://wa.me/5511945339281" target="_blank" rel="noopener">Consulte disponibilidade</a>
+      </div>
       <div class="car-stats">
         <div>Potencia<span>190 cv</span></div>
         <div>Peso<span>640 kg</span></div>
@@ -133,7 +161,7 @@
   <h2 class="section-title" id="historia">Nossa Historia</h2>
   <section class="story">
     <div class="story-photo">
-      <img src="img/nossa-historia.png" alt="Equipe em dia de pista" />
+      <img src="img/nossa-historia.png" alt="Equipe em dia de pista" loading="lazy" decoding="async" />
     </div>
     <p class="story-text">
       A oficina nasceu de dois irmaos apaixonados por carros, que cresceram entre autodromos e
@@ -251,8 +279,6 @@
     <path fill="currentColor" d="M12 7.4 6.2 13.2l1.4 1.4 3.4-3.4V20h2V11.2l3.4 3.4 1.4-1.4L12 7.4z"/>
   </svg>
 </a>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="js/app.js"></script>
 </body>
 </html>
