@@ -4,7 +4,9 @@ Site institucional da ForRace Motorsport com foco em apresentacao da equipe, fro
 
 ## Demo
 
-- Repositorio: `https://github.com/KAUACASANIGA/ForRace.git`
+- Repositorio: `https://github.com/KauaCazzaniga/ForRace-Motorsport.git`
+- Site: `https://kauacazzaniga.github.io/ForRace-Motorsport/`
+- Projetos: `https://kauacazzaniga.github.io/ForRace-Motorsport/projetos.html`
 
 ## Funcionalidades
 
@@ -32,11 +34,11 @@ Site institucional da ForRace Motorsport com foco em apresentacao da equipe, fro
 
 1. Clone o repositorio:
    ```bash
-   git clone https://github.com/KAUACASANIGA/ForRace.git
+   git clone https://github.com/KauaCazzaniga/ForRace-Motorsport.git
    ```
 2. Entre na pasta:
    ```bash
-   cd ForRace
+   cd ForRace-Motorsport
    ```
 3. Abra o `index.html` no navegador.
 
@@ -49,4 +51,3 @@ Para publicar via GitHub Pages:
    - `Source`: `Deploy from a branch`
    - `Branch`: `main`
    - `Folder`: `/ (root)`
-
