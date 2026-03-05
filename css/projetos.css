@@ -703,15 +703,17 @@
   }
 
   .section-title {
-    margin: 28px 0 12px;
+    margin: 18px 0 8px;
   }
 
   .projects-carousel {
-    margin-top: 4px;
+    margin-top: 0;
+    place-items: stretch;
   }
 
   .projects-carousel-track {
     min-height: 0;
+    place-items: stretch;
   }
 
   .projects-grid,
@@ -720,7 +722,7 @@
     gap: 14px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 4px 0 calc(12px + env(safe-area-inset-bottom));
+    padding: 0 0 calc(10px + env(safe-area-inset-bottom));
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
@@ -730,6 +732,7 @@
     overscroll-behavior-x: contain;
     touch-action: pan-x;
     scroll-snap-stop: always;
+    align-items: flex-start;
   }
 
   .projects-grid::-webkit-scrollbar,
@@ -763,6 +766,8 @@
   .projects-carousel-track .project-card.is-side,
   .projects-carousel-track .project-card.is-hidden {
     position: relative;
+    left: auto;
+    top: auto;
     transform: none;
     opacity: 1;
     pointer-events: auto;
@@ -787,8 +792,8 @@
   .project-card {
     text-align: left;
     width: 100%;
-    height: min(460px, 70svh);
-    height: min(460px, 70dvh);
+    height: clamp(320px, 52svh, 380px);
+    height: clamp(320px, 52dvh, 380px);
   }
 
   .project-card h3,
