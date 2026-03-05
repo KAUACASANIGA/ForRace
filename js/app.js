@@ -492,7 +492,7 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     setActiveCard(cardIndex, false);
     overlay.scrollTop = 0;
     overlay.setAttribute("aria-hidden", "false");
-    document.body.classList.add("is-overlay-open");
+    lockBodyScroll();
 
     isMounted = true;
     overlay.style.display = "grid";
@@ -509,7 +509,7 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     hideTimer = window.setTimeout(() => {
       overlay.style.display = "none";
       overlay.setAttribute("aria-hidden", "true");
-      document.body.classList.remove("is-overlay-open");
+      unlockBodyScroll();
       activeCard = null;
       isMounted = false;
     }, hideDelayMs);
@@ -579,11 +579,26 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   card.style.position = "relative";
   card.style.touchAction = "pan-x";
 
+  const header = document.createElement("div");
+  header.className = "project-focus-header";
+  const headerLabel = document.createElement("span");
+  headerLabel.className = "project-focus-header-label";
+  headerLabel.textContent = "ForRace Motorsport";
+  const headerTitle = document.createElement("span");
+  headerTitle.className = "project-focus-header-title";
+  headerTitle.textContent = "Detalhes do projeto";
+  header.append(headerLabel, headerTitle);
+
   const closeButton = document.createElement("button");
   closeButton.type = "button";
   closeButton.className = "project-focus-close";
   closeButton.setAttribute("aria-label", "Fechar projeto");
   closeButton.textContent = "X";
+
+  const closeHotspot = document.createElement("button");
+  closeHotspot.type = "button";
+  closeHotspot.className = "project-focus-close-hotspot";
+  closeHotspot.setAttribute("aria-label", "Fechar projeto");
 
   const mediaWrap = document.createElement("div");
   mediaWrap.className = "project-focus-media-wrap";
@@ -635,7 +650,7 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   tagRow.append(tag);
   const trackHeading = document.createElement("div");
   trackHeading.className = "project-track-heading";
-  trackHeading.textContent = "Autodromos";
+  trackHeading.textContent = "Autódromos";
   const title = document.createElement("h3");
   const projectInfo = document.createElement("div");
   projectInfo.className = "project-info";
@@ -661,7 +676,7 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   rentWidget.append(rentTitle, rentText, rentCta);
 
   content.append(tagRow, title, projectInfo, trackHeading, trackButtons, trackNote, rentWidget);
-  card.append(closeButton, mediaWrap, content);
+  card.append(header, closeButton, closeHotspot, mediaWrap, content);
   overlay.append(card, cardDots, cardPrevButton, cardNextButton);
   projectRoot.appendChild(overlay);
 
@@ -805,7 +820,7 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
       rentCta.removeAttribute("href");
       rentCta.style.pointerEvents = "none";
       rentCta.style.opacity = "0.6";
-      rentCta.textContent = "Loca��o ind�sponivel";
+      rentCta.textContent = "Locação indisponível";
       rentCta.setAttribute("aria-disabled", "true");
       rentCta.removeAttribute("target");
       rentCta.removeAttribute("rel");
@@ -897,7 +912,7 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     preview.className = "project-rent-preview";
 
     const previewTitle = document.createElement("h4");
-    previewTitle.textContent = rentUrl ? "Aluga-se" : "Indísponivel";
+    previewTitle.textContent = rentUrl ? "Aluga-se" : "Indisponível";
     preview.append(previewTitle);
     const summaryElement = el.querySelector("p");
     if (summaryElement) {
@@ -933,6 +948,7 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   });
 
   closeButton.addEventListener("click", close);
+  closeHotspot.addEventListener("click", close);
   overlay.addEventListener("click", (event) => {
     if (event.target !== overlay) return;
     close();
