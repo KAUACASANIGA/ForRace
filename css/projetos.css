@@ -288,6 +288,8 @@
 .project-focus-overlay {
   position: fixed;
   inset: 0;
+  height: 100vh;
+  height: 100dvh;
   z-index: 2100;
   display: grid;
   place-items: center;
@@ -827,20 +829,22 @@
     align-items: stretch;
     height: 100dvh;
     height: 100svh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .project-focus-card {
     width: 100%;
-    height: 100dvh;
-    height: 100svh;
-    max-height: 100dvh;
-    max-height: 100svh;
+    height: 100%;
+    max-height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     margin: 0;
     border-radius: 0;
     display: flex;
     flex-direction: column;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
   .project-focus-header {
@@ -848,7 +852,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 16px;
+    padding: calc(12px + env(safe-area-inset-top)) 16px 8px;
     background: rgba(240, 74, 58, 0.16);
     border-bottom: 1px solid rgba(240, 74, 58, 0.35);
     backdrop-filter: blur(10px);
@@ -887,7 +891,7 @@
   }
 
   .project-focus-content {
-    padding: 16px;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
     flex: 1 1 auto;
     overflow: visible;
     display: block;
