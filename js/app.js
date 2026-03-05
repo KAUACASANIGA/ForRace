@@ -1,5 +1,4 @@
-﻿const fleetGalleryControllers = new Map();
-
+const fleetGalleryControllers = new Map();
 const parseDelimitedList = (value, separator) =>
   (value || "")
     .split(separator)
@@ -359,23 +358,23 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   closeButton.type = "button";
   closeButton.className = "fleet-focus-close";
   closeButton.setAttribute("aria-label", "Fechar destaque");
-  closeButton.textContent = "×";
+  closeButton.textContent = "�";
 
   const media = document.createElement("img");
   media.className = "fleet-focus-media";
   media.alt = "Carro da frota";
 
-  const prevButton = document.createElement("button");
-  prevButton.type = "button";
-  prevButton.className = "fleet-focus-control prev";
-  prevButton.setAttribute("aria-label", "Foto anterior");
-  prevButton.textContent = "<";
+  const cardPrevButton = document.createElement("button");
+  cardPrevButton.type = "button";
+  cardPrevButton.className = "fleet-focus-card-control prev";
+  cardPrevButton.setAttribute("aria-label", "Carro anterior");
+  cardPrevButton.textContent = "<";
 
-  const nextButton = document.createElement("button");
-  nextButton.type = "button";
-  nextButton.className = "fleet-focus-control next";
-  nextButton.setAttribute("aria-label", "Proxima foto");
-  nextButton.textContent = ">";
+  const cardNextButton = document.createElement("button");
+  cardNextButton.type = "button";
+  cardNextButton.className = "fleet-focus-card-control next";
+  cardNextButton.setAttribute("aria-label", "Proximo carro");
+  cardNextButton.textContent = ">";
 
   const dots = document.createElement("div");
   dots.className = "fleet-focus-dots";
@@ -392,8 +391,8 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   copy.className = "fleet-focus-copy";
 
   content.append(tag, title, copy);
-  cardEl.append(closeButton, media, prevButton, nextButton, dots, content);
-  overlay.append(cardEl, cardDots);
+  cardEl.append(closeButton, media, dots, content);
+  overlay.append(cardEl, cardDots, cardPrevButton, cardNextButton);
   fleetRoot.appendChild(overlay);
 
   const updateDots = () => {
@@ -418,10 +417,14 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     cardDots.innerHTML = "";
     if (fleetCards.length <= 1) {
       cardDots.style.display = "none";
+      cardPrevButton.style.display = "none";
+      cardNextButton.style.display = "none";
       return;
     }
 
     cardDots.style.display = "flex";
+    cardPrevButton.style.display = "grid";
+    cardNextButton.style.display = "grid";
     for (let i = 0; i < fleetCards.length; i += 1) {
       const dot = document.createElement("button");
       dot.type = "button";
@@ -451,8 +454,6 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     copy.textContent = activeCard.copy;
 
     const hasGallery = gallerySize > 1;
-    prevButton.style.display = hasGallery ? "grid" : "none";
-    nextButton.style.display = hasGallery ? "grid" : "none";
     dots.style.display = hasGallery ? "flex" : "none";
     updateDots();
   };
@@ -531,13 +532,14 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   });
   cardEl.addEventListener("click", (event) => event.stopPropagation());
   closeButton.addEventListener("click", closeOverlay);
-  prevButton.addEventListener("click", (event) => {
+  // photo navigation uses dots only
+  cardPrevButton.addEventListener("click", (event) => {
     event.stopPropagation();
-    changeOverlaySlide((index, size) => (index - 1 + size) % size);
+    changeFocusedCard((index, size) => (index - 1 + size) % size);
   });
-  nextButton.addEventListener("click", (event) => {
+  cardNextButton.addEventListener("click", (event) => {
     event.stopPropagation();
-    changeOverlaySlide((index, size) => (index + 1) % size);
+    changeFocusedCard((index, size) => (index + 1) % size);
   });
 
   bindHorizontalSwipe(
@@ -587,34 +589,62 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   const media = document.createElement("img");
   media.className = "project-focus-media";
   media.alt = "Foto do projeto";
-
-  const prevButton = document.createElement("button");
-  prevButton.type = "button";
-  prevButton.className = "project-focus-control prev";
-  prevButton.setAttribute("aria-label", "Foto anterior");
-  prevButton.textContent = "<";
-
-  const nextButton = document.createElement("button");
-  nextButton.type = "button";
-  nextButton.className = "project-focus-control next";
-  nextButton.setAttribute("aria-label", "Proxima foto");
-  nextButton.textContent = ">";
+  const mediaVideo = document.createElement("iframe");
+  mediaVideo.className = "project-focus-media project-focus-video";
+  mediaVideo.title = "Video do projeto";
+  mediaVideo.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
+  mediaVideo.setAttribute("allowfullscreen", "true");
+  mediaVideo.style.display = "none";
 
   const dots = document.createElement("div");
   dots.className = "project-focus-dots";
   const cardDots = document.createElement("div");
   cardDots.className = "project-focus-card-dots";
-  mediaWrap.append(media, prevButton, nextButton, dots);
+  mediaWrap.append(media, mediaVideo, dots);
+
+  const cardPrevButton = document.createElement("button");
+  cardPrevButton.type = "button";
+  cardPrevButton.className = "project-focus-card-control prev";
+  cardPrevButton.setAttribute("aria-label", "Projeto anterior");
+  cardPrevButton.textContent = "<";
+
+  const cardNextButton = document.createElement("button");
+  cardNextButton.type = "button";
+  cardNextButton.className = "project-focus-card-control next";
+  cardNextButton.setAttribute("aria-label", "Proximo projeto");
+  cardNextButton.textContent = ">";
 
   const content = document.createElement("div");
   content.className = "project-focus-content";
-  const tag = document.createElement("div");
-  tag.className = "tag";
+  const tagRow = document.createElement("div");
+  tagRow.className = "project-focus-tag-row";
+  const tag = document.createElement("button");
+  tag.type = "button";
+  tag.className = "tag project-tag-toggle";
+  tag.setAttribute("aria-label", "Ver especificacoes do projeto");
+  const tagLine = document.createElement("span");
+  tagLine.className = "project-tag-line";
+  tagLine.setAttribute("aria-hidden", "true");
+  const tagLabel = document.createElement("span");
+  tagLabel.className = "project-tag-label";
+  tagLabel.textContent = "Descrição";
+  tag.append(tagLine, tagLabel);
+  const trackButtons = document.createElement("div");
+  trackButtons.className = "project-track-buttons";
+  tagRow.append(tag);
+  const trackHeading = document.createElement("div");
+  trackHeading.className = "project-track-heading";
+  trackHeading.textContent = "Autodromos";
   const title = document.createElement("h3");
+  const projectInfo = document.createElement("div");
+  projectInfo.className = "project-info";
   const shortCopy = document.createElement("p");
-  shortCopy.className = "project-focus-copy";
+  shortCopy.className = "project-focus-copy project-focus-summary";
   const detailCopy = document.createElement("p");
   detailCopy.className = "project-focus-copy";
+  projectInfo.append(shortCopy, detailCopy);
+  const trackNote = document.createElement("p");
+  trackNote.className = "project-focus-copy project-track-note";
 
   const rentWidget = document.createElement("div");
   rentWidget.className = "project-rent-widget";
@@ -626,18 +656,70 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   rentCta.href = "https://wa.me/5511945339281";
   rentCta.target = "_blank";
   rentCta.rel = "noopener";
-  rentCta.textContent = "Consultar disponibilidade";1
+  rentCta.textContent = "Consultar disponibilidade";
   rentWidget.append(rentTitle, rentText, rentCta);
 
-  content.append(tag, title, shortCopy, detailCopy, rentWidget);
+  content.append(tagRow, title, projectInfo, trackHeading, trackButtons, trackNote, rentWidget);
   card.append(closeButton, mediaWrap, content);
-  overlay.append(card, cardDots);
+  overlay.append(card, cardDots, cardPrevButton, cardNextButton);
   projectRoot.appendChild(overlay);
 
   const projectDataList = [];
   let activeData = null;
   let activeCardIndex = 0;
   let activeIndex = 0;
+  let activeTrackIndex = 0;
+  let activeView = "project";
+
+  const trackIcons = ["img/track-01.png", "img/track-02.png", "img/track-03.png", "img/track-04.png"];
+  trackIcons.forEach((src, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "project-track-button";
+    button.dataset.trackIndex = String(index);
+    button.setAttribute("aria-label", `Selecionar pista ${index + 1}`);
+    const icon = document.createElement("img");
+    icon.src = src;
+    icon.alt = `Pista ${index + 1}`;
+    button.appendChild(icon);
+    trackButtons.appendChild(button);
+  });
+
+  const parseTrackInfo = (value) => {
+    const entries = parseDelimitedList(value, "||");
+    return entries
+      .map((item) => {
+        const parts = item.split("::").map((part) => part.trim());
+        return {
+          name: parts[0] || "",
+          text: parts.slice(1).join("::") || "",
+        };
+      })
+      .filter((item) => item.name || item.text);
+  };
+
+  const renderTracks = () => {
+    const tracks = activeData?.tracks || [];
+    if (tracks.length === 0) {
+      trackButtons.style.display = "none";
+      return;
+    }
+
+    trackButtons.style.display = "flex";
+    const safeIndex = Math.min(Math.max(activeTrackIndex, 0), tracks.length - 1);
+    const activeTrack = tracks[safeIndex];
+
+    if (activeView === "track") {
+      title.textContent = activeTrack.name || "Pista";
+      trackNote.innerHTML = activeTrack.text || "";
+    }
+
+    trackButtons.querySelectorAll("button").forEach((button, index) => {
+      const isVisible = index < tracks.length;
+      button.style.display = isVisible ? "grid" : "none";
+      button.classList.toggle("is-active", activeView === "track" && index === safeIndex);
+    });
+  };
 
   const renderDots = () => {
     dots.innerHTML = "";
@@ -683,12 +765,30 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     const src = activeData.gallery[activeIndex] || "";
     const alt = activeData.alts[activeIndex] || activeData.alts[0] || "Foto do projeto";
 
-    media.src = src;
-    media.alt = alt;
-    tag.textContent = activeData.tag;
+    const shouldShowFuscaVideo = activeCardIndex === 0 && activeView === "track" && activeTrackIndex === 2;
+    const shouldShowEscortVideo = activeCardIndex === 1 && activeView === "track" && activeTrackIndex === 0;
+    if (shouldShowFuscaVideo || shouldShowEscortVideo) {
+      media.style.display = "none";
+      mediaVideo.style.display = "block";
+      if (shouldShowEscortVideo) {
+        mediaVideo.src = "https://www.youtube.com/embed/0NaIWkdqVAs";
+      } else {
+        mediaVideo.src = "https://www.youtube.com/embed/2hlKoQCpf9I?start=136";
+      }
+    } else {
+      mediaVideo.style.display = "none";
+      mediaVideo.removeAttribute("src");
+      media.style.display = "block";
+      media.src = src;
+      media.alt = alt;
+    }
+    tag.classList.toggle("is-active", activeView === "project");
     title.textContent = activeData.title;
     shortCopy.textContent = activeData.shortCopy;
     detailCopy.textContent = activeData.detail;
+    projectInfo.style.display = activeView === "project" ? "block" : "none";
+    trackNote.style.display = activeView === "track" ? "block" : "none";
+    renderTracks();
     rentText.textContent = activeData.rentLabel;
     if (activeData.rentUrl) {
       rentWidget.style.display = "block";
@@ -704,15 +804,13 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
       rentCta.removeAttribute("href");
       rentCta.style.pointerEvents = "none";
       rentCta.style.opacity = "0.6";
-      rentCta.textContent = "Locacao indisponivel";
+      rentCta.textContent = "Loca��o ind�sponivel";
       rentCta.setAttribute("aria-disabled", "true");
       rentCta.removeAttribute("target");
       rentCta.removeAttribute("rel");
     }
 
     const hasGallery = size > 1;
-    prevButton.style.display = hasGallery ? "grid" : "none";
-    nextButton.style.display = hasGallery ? "grid" : "none";
     dots.style.display = hasGallery ? "flex" : "none";
     renderDots();
   };
@@ -723,6 +821,8 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     activeCardIndex = normalizedIndex;
     activeData = projectDataList[normalizedIndex];
     activeIndex = 0;
+    activeTrackIndex = 0;
+    activeView = "project";
     render();
     renderCardDots();
     card.scrollTop = 0;
@@ -739,8 +839,13 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     });
   };
 
-  const open = (cardIndex) => {
+  const open = (cardIndex, trackIndex = null) => {
     setActiveProjectCard(cardIndex);
+    if (Number.isFinite(trackIndex)) {
+      activeView = "track";
+      activeTrackIndex = trackIndex;
+      render();
+    }
     overlay.scrollTop = 0;
     overlay.setAttribute("aria-hidden", "false");
     document.body.classList.add("is-overlay-open");
@@ -774,12 +879,20 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     const alts = parseDelimitedList(el.dataset.galleryAlts, "|");
     const rentLabel = el.dataset.rentLabel || "Disponivel sob consulta.";
     const rentUrl = el.dataset.rentUrl || "";
+    const trackInfo = parseTrackInfo(el.dataset.trackInfo);
+    const trackFallback = el.dataset.trackNote || "";
+    const tracks =
+      trackInfo.length > 0
+        ? trackInfo
+        : trackFallback
+        ? [{ name: "Pista", text: trackFallback }]
+        : [];
 
     const preview = document.createElement("div");
     preview.className = "project-rent-preview";
 
     const previewTitle = document.createElement("h4");
-    previewTitle.textContent = rentUrl ? "Aluga-se" : "Indisponivel";
+    previewTitle.textContent = rentUrl ? "Aluga-se" : "Indísponivel";
     preview.append(previewTitle);
     const summaryElement = el.querySelector("p");
     if (summaryElement) {
@@ -800,6 +913,8 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
       title: el.querySelector("h3")?.textContent?.trim() || "Projeto ForRace",
       shortCopy: el.querySelector("p")?.textContent?.trim() || "",
       detail: el.dataset.detail || "",
+      trackNote: el.dataset.trackNote || "",
+      tracks,
       rentLabel,
       rentUrl,
     };
@@ -809,6 +924,7 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
       if (event.target.closest("a, button")) return;
       open(cardIndex);
     });
+
   });
 
   closeButton.addEventListener("click", close);
@@ -817,13 +933,35 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
     close();
   });
   card.addEventListener("click", (event) => event.stopPropagation());
-  prevButton.addEventListener("click", (event) => {
+  tag.addEventListener("click", (event) => {
     event.stopPropagation();
-    changeSlide((index, size) => (index - 1 + size) % size);
+    if (!activeData) return;
+    activeView = "project";
+    render();
   });
-  nextButton.addEventListener("click", (event) => {
+  trackButtons.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-track-index]");
+    if (!button) return;
     event.stopPropagation();
-    changeSlide((index, size) => (index + 1) % size);
+    const nextIndex = Number.parseInt(button.dataset.trackIndex || "0", 10);
+    if (!Number.isFinite(nextIndex)) return;
+    if (activeView === "track" && activeTrackIndex === nextIndex) {
+      activeView = "project";
+      render();
+      return;
+    }
+    activeView = "track";
+    activeTrackIndex = nextIndex;
+    render();
+  });
+  // photo navigation uses dots only
+  cardPrevButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    changeFocusedProjectCard((index, size) => (index - 1 + size) % size);
+  });
+  cardNextButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    changeFocusedProjectCard((index, size) => (index + 1) % size);
   });
 
   bindHorizontalSwipe(
@@ -840,6 +978,102 @@ const bindHorizontalSwipe = (element, onSwipeLeft, onSwipeRight) => {
   });
 
   overlay.style.display = "none";
+})();
+
+(() => {
+  const carousel = document.querySelector(".projects-carousel");
+  const track = carousel?.querySelector(".projects-carousel-track");
+  if (!carousel || !track) return;
+
+  const cards = Array.from(track.querySelectorAll(".project-card"));
+  if (cards.length <= 1) return;
+
+  const prevButton = carousel.querySelector(".projects-carousel-control.prev");
+  const nextButton = carousel.querySelector(".projects-carousel-control.next");
+  const mediaQuery = window.matchMedia("(max-width: 720px)");
+  let activeIndex = 0;
+  let autoTimer = null;
+
+  const clearClasses = () => {
+    cards.forEach((card) => {
+      card.classList.remove("is-active", "is-side", "is-hidden", "is-left", "is-right");
+    });
+  };
+
+  const render = () => {
+    if (mediaQuery.matches) {
+      clearClasses();
+      return;
+    }
+
+    cards.forEach((card, index) => {
+      card.classList.remove("is-active", "is-side", "is-hidden", "is-left", "is-right");
+      const offset = (index - activeIndex + cards.length) % cards.length;
+      if (offset === 0) {
+        card.classList.add("is-active");
+        return;
+      }
+      if (offset === 1) {
+        card.classList.add("is-side", "is-right");
+        return;
+      }
+      if (offset === cards.length - 1) {
+        card.classList.add("is-side", "is-left");
+        return;
+      }
+      card.classList.add("is-hidden");
+    });
+  };
+
+  const move = (direction) => {
+    activeIndex = (activeIndex + direction + cards.length) % cards.length;
+    render();
+  };
+
+  prevButton?.addEventListener("click", () => move(-1));
+  nextButton?.addEventListener("click", () => move(1));
+
+  cards.forEach((card, index) => {
+    card.addEventListener("click", () => {
+      if (mediaQuery.matches) return;
+      if (card.classList.contains("is-active")) return;
+      activeIndex = index;
+      render();
+    });
+  });
+
+  if (typeof mediaQuery.addEventListener === "function") {
+    mediaQuery.addEventListener("change", render);
+  } else if (typeof mediaQuery.addListener === "function") {
+    mediaQuery.addListener(render);
+  }
+
+  const startAuto = () => {
+    if (autoTimer) return;
+    autoTimer = window.setInterval(() => {
+      if (mediaQuery.matches) return;
+      move(1);
+    }, 3000);
+  };
+
+  const stopAuto = () => {
+    if (!autoTimer) return;
+    window.clearInterval(autoTimer);
+    autoTimer = null;
+  };
+
+  carousel.addEventListener("mouseenter", stopAuto);
+  carousel.addEventListener("mouseleave", startAuto);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopAuto();
+    } else {
+      startAuto();
+    }
+  });
+
+  render();
+  startAuto();
 })();
 
 (() => {

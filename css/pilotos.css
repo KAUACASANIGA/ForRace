@@ -14,7 +14,7 @@
 
 .crew-hero p {
   margin: 0 0 24px;
-  font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+  font-family: var(--body-font);
   font-size: 18px;
   line-height: 1.6;
   color: var(--muted);
@@ -43,12 +43,11 @@
 .crew-card h3 {
   margin: 0 0 10px;
   font-size: 22px;
-  text-transform: uppercase;
 }
 
 .crew-card p {
   margin: 0;
-  font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+  font-family: var(--body-font);
   color: var(--muted);
   line-height: 1.6;
   font-size: 14px;

@@ -1,4 +1,6 @@
-:root {
+    @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Chakra+Petch:ital,wght@1,400;1,500;1,600;1,700&family=Inter:wght@400;500;600;700&display=swap");
+
+    :root {
       --bg: #0b0d10;
       --bg-alt: #151a20;
       --ink: #f4f2ed;
@@ -6,6 +8,22 @@
       --accent: #f04a3a;
       --accent-2: #f7c548;
       --line: rgba(244, 242, 237, 0.12);
+      --display-font: "Bebas Neue", "Impact", "Haettenschweiler", "Arial Narrow", sans-serif;
+      --title-font: "Chakra Petch", "Trebuchet MS", "Lucida Sans", "Lucida Sans Unicode", sans-serif;
+      --body-font: "Inter", "Trebuchet MS", "Lucida Sans", "Lucida Sans Unicode", sans-serif;
+    }
+
+    h1,
+    h2,
+    h3,
+    .section-title {
+      font-family: var(--title-font);
+      font-style: italic;
+    }
+
+    .brand {
+      font-family: var(--title-font);
+      font-style: italic;
     }
 
     * {
@@ -18,14 +36,20 @@
       radial-gradient(circle at 80% 0%, rgba(247, 197, 72, 0.18), transparent 40%),
       linear-gradient(180deg, #0b0d10 0%, #0f1217 50%, #0b0d10 100%);
       color: var(--ink);
-      font-family: "Impact", "Haettenschweiler", "Arial Narrow", sans-serif;
+      font-family: var(--display-font);
       letter-spacing: 0.4px;
+      font-weight: 700;
     }
 
-    body.is-overlay-open .mobile-quick-nav {
-      visibility: hidden;
-      pointer-events: none;
-    }
+body.is-overlay-open .mobile-quick-nav {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body.is-overlay-open {
+  overflow: hidden;
+  touch-action: none;
+}
 
     .wrap {
       max-width: 1100px;
@@ -70,7 +94,6 @@
       display: flex;
       gap: 18px;
       font-size: 14px;
-      text-transform: uppercase;
     }
 
     .mobile-quick-nav {
@@ -191,12 +214,11 @@
     .pilots-entry h2 {
       margin: 0 0 8px;
       font-size: 24px;
-      text-transform: uppercase;
     }
 
     .pilots-entry p {
       margin: 0;
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       color: var(--muted);
     }
 
@@ -211,7 +233,7 @@
     }
 
     .hero p {
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       font-size: 18px;
       line-height: 1.6;
       color: var(--muted);
@@ -227,7 +249,6 @@
       background: var(--accent);
       color: #111;
       text-decoration: none;
-      text-transform: uppercase;
       font-size: 14px;
       letter-spacing: 1px;
       box-shadow: 0 20px 40px rgba(240, 74, 58, 0.25);
@@ -253,7 +274,6 @@
       background: rgba(240, 74, 58, 0.12);
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
       text-decoration: none;
-      text-transform: uppercase;
       font-size: 12px;
       letter-spacing: 1px;
     }
@@ -287,7 +307,6 @@
     .hero-card h2 {
       margin: 0 0 16px;
       font-size: 22px;
-      text-transform: uppercase;
     }
 
     .stats {
@@ -303,7 +322,6 @@
       border-radius: 14px;
       border: 1px solid var(--line);
       background: rgba(15, 18, 23, 0.7);
-      text-transform: uppercase;
       font-size: 12px;
       letter-spacing: 1px;
       text-decoration: none;
@@ -327,7 +345,6 @@
 
     .section-title {
       font-size: 28px;
-      text-transform: uppercase;
       margin: 64px 0 20px;
     }
 
@@ -362,7 +379,8 @@
 
     .fleet-focus-card {
       position: relative;
-      width: min(900px, 92vw);
+      width: min(1080px, 94vw);
+      height: clamp(520px, 78vh, 680px);
       max-height: 90vh;
       overflow: auto;
       overflow-x: hidden;
@@ -440,26 +458,38 @@
       cursor: pointer;
     }
 
-    .fleet-focus-control {
+    .fleet-focus-card-control {
       position: absolute;
-      top: 45%;
+      top: 50%;
       transform: translateY(-50%);
-      width: 42px;
-      height: 42px;
+      width: 46px;
+      height: 46px;
       border-radius: 999px;
-      border: 1px solid rgba(244, 242, 237, 0.3);
-      background: rgba(11, 13, 16, 0.78);
+      border: 1px solid rgba(244, 242, 237, 0.2);
+      background: rgba(11, 13, 16, 0.85);
       color: var(--ink);
-      font-size: 22px;
+      font-size: 26px;
       line-height: 1;
       display: grid;
       place-items: center;
       cursor: pointer;
-      z-index: 3;
+      z-index: 7;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .fleet-focus-control.prev { left: 14px; }
-    .fleet-focus-control.next { right: 14px; }
+    .fleet-focus-overlay .fleet-focus-card-control.prev {
+      left: calc(50% - min(450px, 46vw) - 56px);
+    }
+
+    .fleet-focus-overlay .fleet-focus-card-control.next {
+      right: calc(50% - min(450px, 46vw) - 56px);
+    }
+
+    .fleet-focus-card-control:hover {
+      transform: translateY(-50%) scale(1.05);
+      border-color: rgba(247, 197, 72, 0.7);
+      box-shadow: 0 12px 22px -16px rgba(240, 74, 58, 0.6);
+    }
 
     .fleet-focus-dots {
       position: absolute;
@@ -471,16 +501,6 @@
       z-index: 3;
     }
 
-    .fleet-focus-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(244, 242, 237, 0.45);
-      background: rgba(244, 242, 237, 0.2);
-      padding: 0;
-      cursor: pointer;
-    }
-
     .fleet-focus-dot.is-active {
       border-color: var(--accent-2);
       background: var(--accent-2);
@@ -488,26 +508,20 @@
 
     .fleet-focus-card-dots {
       display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 4px;
+      margin-top: 0;
       padding: 8px 12px;
       border-radius: 999px;
       border: 1px solid rgba(244, 242, 237, 0.16);
       background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(15, 18, 23, 0.72));
       box-shadow: 0 14px 26px -22px rgba(0, 0, 0, 0.82);
-    }
-
-    .fleet-focus-card-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(244, 242, 237, 0.45);
-      background: rgba(244, 242, 237, 0.2);
-      padding: 0;
-      cursor: pointer;
-      transition: transform 0.2s ease, width 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+      z-index: 4;
     }
 
     .fleet-focus-card-dot.is-active {
@@ -525,12 +539,11 @@
       margin: 10px 0 10px;
       font-size: clamp(28px, 5vw, 46px);
       line-height: 0.95;
-      text-transform: uppercase;
     }
 
     .fleet-focus-copy {
       margin: 0;
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       font-size: 17px;
       color: var(--muted);
       line-height: 1.65;
@@ -551,7 +564,6 @@
       min-height: 240px;
       display: grid;
       place-items: center;
-      text-transform: uppercase;
       letter-spacing: 1px;
       color: var(--muted);
       font-size: 12px;
@@ -581,7 +593,7 @@
     }
 
     .story-text {
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       color: var(--muted);
       line-height: 1.7;
       margin: 0;
@@ -656,7 +668,6 @@
       inset: 0;
       display: grid;
       place-items: center;
-      text-transform: uppercase;
       letter-spacing: 2px;
       font-size: 18px;
       color: rgba(244, 242, 237, 0.9);
@@ -666,7 +677,6 @@
     }
 
     .car-photo span {
-      text-transform: uppercase;
       letter-spacing: 2px;
       font-size: 14px;
       color: rgba(244, 242, 237, 0.5);
@@ -729,7 +739,6 @@
     .tag {
       display: inline-block;
       font-size: 12px;
-      text-transform: uppercase;
       background: rgba(240, 74, 58, 0.2);
       color: var(--accent);
       padding: 6px 10px;
@@ -740,7 +749,7 @@
 
     .car p {
       margin: 0;
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       font-size: 14px;
       color: var(--muted);
       line-height: 1.6;
@@ -766,7 +775,6 @@
       background: rgba(255, 255, 255, 0.03);
       color: var(--ink);
       text-decoration: none;
-      text-transform: uppercase;
       letter-spacing: 0.8px;
       font-size: 11px;
       display: inline-flex;
@@ -804,7 +812,6 @@
       grid-template-columns: repeat(3, minmax(70px, 1fr));
       gap: 12px;
       font-size: 10px;
-      text-transform: uppercase;
       letter-spacing: 1px;
       color: var(--muted);
     }
@@ -857,12 +864,11 @@
     .card h4 {
       margin: 0 0 8px;
       font-size: 16px;
-      text-transform: uppercase;
     }
 
     .card p {
       margin: 0;
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       font-size: 14px;
       color: var(--muted);
       line-height: 1.5;
@@ -871,14 +877,13 @@
     .agenda-block h4 {
       margin: 0 0 12px;
       font-size: 16px;
-      text-transform: uppercase;
     }
 
     .agenda-list {
       list-style: none;
       padding: 0;
       margin: 0;
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       color: var(--muted);
       font-size: 14px;
       line-height: 1.6;
@@ -902,7 +907,6 @@
       border: 1px solid rgba(244, 242, 237, 0.26);
       background: rgba(255, 255, 255, 0.04);
       color: var(--ink);
-      text-transform: uppercase;
       letter-spacing: 0.8px;
       font-size: 11px;
       padding: 0 12px;
@@ -930,7 +934,7 @@
 
     .cta-band p {
       margin: 0;
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       color: var(--muted);
     }
 
@@ -951,12 +955,11 @@
     .location-card h3 {
       margin: 0 0 12px;
       font-size: 20px;
-      text-transform: uppercase;
     }
 
     .location-card p {
       margin: 0 0 8px;
-      font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+      font-family: var(--body-font);
       color: var(--muted);
       line-height: 1.5;
     }
@@ -989,7 +992,6 @@
       padding-top: 20px;
       font-size: 12px;
       color: var(--muted);
-      text-transform: uppercase;
       letter-spacing: 1px;
     }
 
@@ -1057,7 +1059,6 @@
         border-radius: 12px;
         border: 1px solid var(--line);
         text-decoration: none;
-        text-transform: uppercase;
         font-size: 12px;
         letter-spacing: 0.8px;
         color: var(--ink);
@@ -1068,6 +1069,22 @@
 
       .hero {
         padding-top: 20px;
+      }
+
+      .hero-card .stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .hero-card .stat {
+        font-size: 11px;
+        letter-spacing: 0.8px;
+      }
+
+      .hero-card .stat span {
+        font-size: 16px;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
       }
 
       .pilots-entry {
@@ -1208,6 +1225,7 @@
 
       .fleet-focus-card {
         width: min(94vw, 620px);
+        height: clamp(520px, 78vh, 680px);
         max-height: calc(100vh - 88px);
         max-height: calc(100svh - 88px);
         overflow-y: auto;
@@ -1221,10 +1239,17 @@
         height: clamp(220px, 42vh, 320px);
       }
 
-      .fleet-focus-control {
+      .fleet-focus-card-control {
         width: 36px;
         height: 36px;
-        top: clamp(70px, 20vh, 140px);
+      }
+
+      .fleet-focus-card-control.prev {
+        left: calc(50% - min(310px, 47vw) - 42px);
+      }
+
+      .fleet-focus-card-control.next {
+        right: calc(50% - min(310px, 47vw) - 42px);
       }
 
       .fleet-focus-dots {
@@ -1247,23 +1272,20 @@
     }
 .logo-title {
   font-size: 18px;
-  text-transform: uppercase;
 }
 
 .logo-subtitle {
   font-size: 12px;
   color: var(--muted);
-  text-transform: uppercase;
 }
 
 .setup-text {
-  font-family: "Trebuchet MS", "Lucida Sans", sans-serif;
+  font-family: var(--body-font);
   color: var(--muted);
   line-height: 1.6;
 }
 
 .cta-title {
   font-size: 20px;
-  text-transform: uppercase;
 }
 
