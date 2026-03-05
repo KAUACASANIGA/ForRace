@@ -767,16 +767,13 @@
   }
 
   .project-focus-card {
-    width: min(94vw, 620px);
-    height: clamp(520px, 78vh, 680px);
-    max-height: calc(100vh - 88px);
-    max-height: calc(100svh - 88px);
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    height: calc(100svh - 24px);
+    max-height: calc(100svh - 24px);
+    overflow: hidden;
     margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
 
   .project-focus-card-control {
@@ -795,6 +792,9 @@
 
   .project-focus-content {
     padding: 18px 16px 20px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .project-focus-tag-row,
@@ -808,7 +808,8 @@
     border-top: 1px solid rgba(244, 242, 237, 0.06);
     width: 100%;
     max-width: 100%;
-    height: clamp(220px, 40vh, 420px);
+    height: clamp(220px, 38vh, 360px);
+    flex: 0 0 auto;
   }
 
   .project-track-button {
